@@ -28,13 +28,22 @@ export const volces: Recipe = {
       default_dims: 2048,
       // No Matryoshka; doubao-embedding-vision is fixed at 2048. HNSW will
       // fall back to exact scan (pgvector cap 2000).
-      max_batch_tokens: 8192,
+      // Ark hard caps embeddings at 10 inputs per request (a count limit, not
+      // a token limit). max_batch_count enforces that cap; max_batch_tokens
+      // keeps the token total in check independently. The existing
+      // isTokenLimitError regex does not match Ark's "input limit exceeded:
+      // max 10, got N" wording, so recursive-halving cannot recover a miss —
+      // both caps below must hold on their own.
+      max_batch_tokens: 8000,
+      max_batch_count: 10,
       // doubao tokenizer is CJK-dense like dashscope; conservative
       // chars_per_token=2 leaves headroom.
       chars_per_token: 2,
     },
     expansion: {
-      models: ['GLM-5.1'],
+      // GLM-5.1 rejects response_format=json_object. doubao-seed-2-0-mini
+      // honors it under the Coding Plan and is the preferred expansion model.
+      models: ['doubao-seed-2-0-mini-260428', 'GLM-5.1'],
     },
     chat: {
       models: ['GLM-5.1'],

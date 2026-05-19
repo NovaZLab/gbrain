@@ -55,6 +55,16 @@ export interface EmbeddingTouchpoint {
    */
   safety_factor?: number;
   /**
+   * Hard cap on the number of inputs accepted by a single embedding request,
+   * orthogonal to `max_batch_tokens`. Some providers (Ark / Volcano Engine)
+   * reject batches whose `input` array exceeds a fixed count (e.g. 10) even
+   * when the total tokens stay under the token cap — token-only budgeting
+   * cannot defend against this when a long chunk followed by many short
+   * chunks lets the accumulator stay under the token budget while crossing
+   * the count cap. Only consulted alongside `max_batch_tokens`.
+   */
+  max_batch_count?: number;
+  /**
    * v0.27.1: when true, at least one model in this recipe accepts image
    * inputs via a multimodal embedding endpoint (e.g. Voyage's
    * /v1/multimodalembeddings). Drives gateway.embedMultimodal() routing.
